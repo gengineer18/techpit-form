@@ -173,3 +173,61 @@ JavaScript では、Object 内に同じ項目があった場合は後の項目�
 ## store をアプリケーションに登録
 combineReducersという redux の API を用いて reducer をひとつにまとめます
 それをcreateStoreという API に食わせることで store として動くようになります。
+
+## componentからredux に接続
+まず接続用関数を準備
+```js
+import React from "react";
+// 以下の行を追加
+import { useDispatch, useSelector } from "react-redux";
+import { TextField } from "@material-ui/core";
+
+import useStyles from "./styles";
+// 以下の行を追加
+import { RootState } from "../domain/entity/rootState";
+
+const Basic = () => {
+  // ==========ここから追加する==========
+  const dispatch = useDispatch();
+  const profile = useSelector((state: RootState) => state.profile);
+  // ==========ここまで追加する==========
+
+  const classes = useStyles();
+
+  return (
+    // ...
+  );
+};
+
+export default Basic;
+```
+
+useDispatch()関数と、useSelector(state => state.profile)関数準備
+
+2. actionの読み込み
+
+3. jsx
+```jsx
+<TextField
+  fullWidth
+  className={classes.formField}
+  label="名前"
+  value={profile.name}
+  onChange={e => handleChange({name: e.target.value})}
+/>
+```
+
+4. ハンドリング
+```js
+const handleChange = (member: Partial<Profile>) => {
+  dispatch(profileActions.setProfile(member))
+}
+```
+
+useDispatch()という hooks がでてきました。redux の状態を更新するために新しい状態を送ることを dispatch というのですが、その dispatch をするための関数を作成してくれる hooks です。
+
+handleChange()では、更新したい項目だけを受け取って reducer に dispatch しています。また、それぞれのTextFiledコンポーネントで value として store の値を、ハンドラとしてhandleChangeを渡しています。
+
+
+## 定数を定義
+ラベリングなどはserviceディレクトリに持たせる
