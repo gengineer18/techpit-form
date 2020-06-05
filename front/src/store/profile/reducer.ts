@@ -36,3 +36,10 @@ export const profileReducer = reducerWithInitialState(init)
       }
     })
   )
+  .case(
+    profileActions.searchAddress.done,
+    (state, payload) => ({
+      ...state,
+      address: { ...state.address, ...payload.result }
+    })
+  )

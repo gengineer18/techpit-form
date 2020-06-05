@@ -242,3 +242,18 @@ IAddressという名前で import していて、Iは interface の略です。�
 正しいフォーマットかどうかを判定するコードを実装しましょう。まずは、ファイルを作成しましょう。これはロジックにあたるのでservices配下に作成します。
 
 $ touch src/domain/services/address.ts
+
+## actionの非同期処理
+actionCreator.async()を使うことで、非同期処理用のstart、done、failの 3 つの action を作成することができます。generics の 3 つの型引数はこのstart、done、failに対応していて、そのときにどんな型の payload を渡すのかを定義できます。
+
+今回は、done のときしか必要ないので引数の 2 つ目だけ定義しています。（本当は要件的にはactionCreator()で十分なのですが、機能の紹介として今回はあえてactionCreator.async()を使っています。）
+
+## redux-thunk
+applyMiddlewareは redux-thunk という外部ライブラリを redux に登録するためのものだと思ってください。composeは Redux Dev Tool と middleware をまとめて store に登録するものだという認識で ok です。
+
+## 非同期アクションを実装しよう
+非同期アクションを作成していきます。redux-thunk では、dispatch 関数を引数にとる関数を返す関数（高階関数）を非同期 action として扱います。actions に書いてもいいのですが、わかりやすいように新しいファイルを作成しましょう。
+
+effectsという名前は副作用がある関数ということを明示しています。副作用とは関数型での考え方で、副作用がある関数というとインプット（＝引数）が同じでも実行するタイミングによって結果が変わる関数を指します。結果が変わる原因としては内部に状態を持っていたり通信処理を含んでいたりということが挙げられます。今回の action では通信を含む非同期処理が副作用にあたります。
+
+一方、actions.tsに書いていた関数は副作用がない関数（＝純粋な関数）で、引数が同じであれば何度実行しても同じ Object しか得られません。
