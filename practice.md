@@ -231,3 +231,14 @@ handleChange()では、更新したい項目だけを受け取って reducer に
 
 ## 定数を定義
 ラベリングなどはserviceディレクトリに持たせる
+
+## コンポーネント名の競合
+コンポーネント名と型名がどちらもAddressで競合してしまうことです。2 回宣言したと見なされるのでコンパイルエラーとなってしまいます。ここでは、別名で import することで回避しています。
+
+import { Address as IAddress } from "../domain/entity/address";
+IAddressという名前で import していて、Iは interface の略です。このように命名する慣習があるのでそれに従いました。
+
+## フォーマット判定はserviceでやる
+正しいフォーマットかどうかを判定するコードを実装しましょう。まずは、ファイルを作成しましょう。これはロジックにあたるのでservices配下に作成します。
+
+$ touch src/domain/services/address.ts
