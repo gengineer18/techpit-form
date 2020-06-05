@@ -9,10 +9,12 @@ import { isPostalcode } from "../domain/services/address"
 
 // 型定義
 import { RootState } from "../domain/entity/rootState"
-import { Address as IAddress } from "../domain/entity/address";
+import { Address as IAddress } from "../domain/entity/address"
 
 // action
-import { profileActions } from "../store/profile/actions";
+import { profileActions } from "../store/profile/actions"
+
+import { searchAddressFromPostalcode } from '../store/profile/effects'
 
 import useStyles from './styles'
 
@@ -28,6 +30,7 @@ export const Address = () => {
   const handlePostalcodeChange = (postalcode: string) => {
     if(!isPostalcode(postalcode)) return
     dispatch(profileActions.setAddress({ postalcode: postalcode }))
+    dispatch(searchAddressFromPostalcode(postalcode))
   }
 
   return (
