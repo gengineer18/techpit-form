@@ -8,5 +8,10 @@ export const PROFILE = {
     PREFECTURE: "都道府県",
     CITY: "市区町村",
     RESTADDRES: "番地以下",
+  },
+  CAREERS: {
+    COMPANY: "会社名",
+    POSITION: "役職",
+    SPAN: "期間"
   }
 }
