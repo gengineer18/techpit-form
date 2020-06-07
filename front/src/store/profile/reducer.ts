@@ -1,7 +1,7 @@
 import { reducerWithInitialState } from "typescript-fsa-reducers"
 import { Profile } from "../../domain/entity/profile"
+import { Career } from '../../domain/entity/career'
 import { profileActions } from "./actions"
-
 
 const init: Profile = {
   name: "",
@@ -13,8 +13,16 @@ const init: Profile = {
     prefecture: "",
     city: "",
     restAddress: "",
-  }
+  },
+  careers: []
 }
+
+const initCareer: Career = {
+  company: "",
+  position: "",
+  startAt: "",
+  endAt: ""
+};
 
 export const profileReducer = reducerWithInitialState(init)
   .case(
@@ -43,3 +51,21 @@ export const profileReducer = reducerWithInitialState(init)
       address: { ...state.address, ...payload.result }
     })
   )
+  .case(
+    profileActions.setCareer,
+    (state, payload) => ({
+      ...state,
+      careers: state.careers.map((c, i) =>
+        i === payload.index ? { ...c, ...payload.career} : c
+      )
+    })
+  )
+  .case(profileActions.deleteCareer,
+    (state, payload) => ({
+    ...state,
+    careers: state.careers.filter((_, i) => i !== payload)
+  }))
+  .case(profileActions.addCareer, state => ({
+    ...state,
+    careers: [...state.careers, initCareer]
+  }));
