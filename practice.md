@@ -262,3 +262,26 @@ effectsという名前は副作用がある関数ということを明示して�
 actionの実行
 
 component->(effects->)action->reducer
+
+## career
+これまでは更新したい項目だけを渡せば ok でしたが、複数の職歴を入力できるcareerでは、何番目の職歴なのかという情報も必要になります。そのためpayloadは以下の型です。
+
+type Payload = {
+  // 更新したい項目
+  career: Partial<Career>;
+
+  // 何番目の職歴なのか
+  index: number;
+};
+
+続いては削除です。
+
+actionCreator<number>("DELETE_CAREER");
+何番目の職歴を削除するかを指定したいので、payloadはnumberです。
+
+最後は職歴の追加です。
+
+actionCreator<{}>("ADD_CAREER");
+payloadはありません。これは、追加の際には初期値の職歴を新たに追加して職歴のフォームを追加で表示させるためです。
+
+map や filter などを使って直接オブジェクトを書き換えるのではなく新しい配列を返すことが望ましいです。
