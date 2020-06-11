@@ -1,6 +1,7 @@
 import { Gender } from "./gender"
 import { Address } from "./address"
 import { Career } from './career'
+import { College } from './college'
 
 export type Profile = {
   name: string
@@ -9,4 +10,5 @@ export type Profile = {
   gender: Gender
   address: Address
   careers: Career[]
+  college: College
 }
