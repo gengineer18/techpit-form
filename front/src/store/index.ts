@@ -2,10 +2,12 @@ import { createStore, combineReducers, applyMiddleware, compose } from "redux"
 import thunk from 'redux-thunk'
 import { profileReducer } from "./profile/reducer"
 import { RootState } from "../domain/entity/rootState"
+import { collegesReducer } from "./colleges/reducer"
 
 export const store = createStore(
   combineReducers<RootState>({
-    profile: profileReducer
+    profile: profileReducer,
+    colleges: collegesReducer
   }),
   compose(
     applyMiddleware(thunk),

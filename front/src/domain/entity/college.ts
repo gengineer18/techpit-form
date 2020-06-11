@@ -8,3 +8,7 @@ export type College = {
   // 学科
   department: string;
 }
+
+export type Colleges = {
+  search: string
+}
