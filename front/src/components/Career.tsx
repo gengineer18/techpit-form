@@ -9,17 +9,22 @@ import { Career as ICareer } from "../domain/entity/career";
 
 // store
 import { profileActions } from "../store/profile/actions"
+import validationActions from "../store/validation/actions"
 
 import { exitEmptyCareers } from "../domain/services/career"
+import { calculateValidation } from "../domain/services/validation";
 
 import useStyles from './styles'
 
 export const Career = () => {
   const dispatch = useDispatch();
   const careers = useSelector((state: RootState) => state.profile.careers);
+  const profile = useSelector((state: RootState) => state.profile);
+  const validation = useSelector((state: RootState) => state.validation);
 
   const handleChange = (member: Partial<ICareer>, i: number) => {
     dispatch(profileActions.setCareer({ career: member, index: i }));
+    recalculateValidation(member, i);
   }
 
   const handleAddCareer = () => {
@@ -32,30 +37,48 @@ export const Career = () => {
 
   const isAbleToAddCareer = exitEmptyCareers(careers)
 
+  const recalculateValidation = (member: Partial<ICareer>, i: number) => {
+    if (!validation.isStartValidation) return;
+
+    const newProfile = {
+      ...profile,
+      career: profile.careers.map((c, _i) =>
+        _i === i ? { ...c, ...member } : c
+      )
+    };
+    const message = calculateValidation(newProfile);
+    dispatch(validationActions.setValidation(message));
+  };
+
   const classes = useStyles()
+
   return (
     <>
       {careers.map((c, i) => (
         <Fragment key={i}>
           <Typography variant="h5" component="h3" className={classes.title}>
-            職歴{i + 1}
+            職歴 {i + 1}
           </Typography>
           <TextField
             className={classes.formField}
             fullWidth
-            label={PROFILE.CAREERS.COMPANY}
+            error={!!validation.message.careers[i]?.company}
+            helperText={validation.message.careers[i]?.company}
+            label="会社名"
             value={c.company}
             onChange={e => handleChange({ company: e.target.value }, i)}
           />
           <TextField
             className={classes.formField}
             fullWidth
-            label={PROFILE.CAREERS.POSITION}
+            error={!!validation.message.careers[i]?.position}
+            helperText={validation.message.careers[i]?.position}
+            label="役職"
             value={c.position}
             onChange={e => handleChange({ position: e.target.value }, i)}
           />
           <div className={classes.careerSpan}>
-            <InputLabel shrink>{PROFILE.CAREERS.SPAN}</InputLabel>
+            <InputLabel shrink>期間</InputLabel>
             <Grid
               container
               spacing={1}
@@ -66,6 +89,8 @@ export const Career = () => {
                 <TextField
                   fullWidth
                   type="month"
+                  error={!!validation.message.careers[i]?.startAt}
+                  helperText={validation.message.careers[i]?.startAt}
                   InputLabelProps={{
                     shrink: true
                   }}
@@ -80,6 +105,8 @@ export const Career = () => {
                 <TextField
                   fullWidth
                   type="month"
+                  error={!!validation.message.careers[i]?.endAt}
+                  helperText={validation.message.careers[i]?.endAt}
                   InputLabelProps={{
                     shrink: true
                   }}
@@ -98,7 +125,7 @@ export const Career = () => {
           >
             職歴 {i + 1} を削除
           </Button>
-          </Fragment>
+        </Fragment>
       ))}
       <Button
         className={classes.button}
@@ -110,5 +137,5 @@ export const Career = () => {
         職歴を追加
       </Button>
     </>
-  )
+  );
 }
