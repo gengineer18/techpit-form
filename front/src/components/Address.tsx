@@ -10,11 +10,15 @@ import { isPostalcode } from "../domain/services/address"
 // 型定義
 import { RootState } from "../domain/entity/rootState"
 import { Address as IAddress } from "../domain/entity/address"
+import { Profile } from "../domain/entity/profile";
 
 // action
 import { profileActions } from "../store/profile/actions"
+import validationActions from "../store/validation/actions";
 
 import { searchAddressFromPostalcode } from '../store/profile/effects'
+
+import { calculateValidation } from "../domain/services/validation";
 
 import useStyles from './styles'
 
@@ -27,12 +31,27 @@ export const Address = () => {
 
   const handleAddressChange = (member: Partial<IAddress>) => {
     dispatch(profileActions.setAddress(member))
+    recalculateValidation({ address: { ...profile.address, ...member } })
   }
 
   const handlePostalcodeChange = (postalcode: string) => {
     if(!isPostalcode(postalcode)) return
     dispatch(profileActions.setAddress({ postalcode: postalcode }))
     dispatch(searchAddressFromPostalcode(postalcode))
+    recalculateValidation({
+      address: { ...profile.address, postalcode: postalcode }
+    });
+  }
+
+  const recalculateValidation = (member: Partial<Profile>) => {
+    if (!validation.isStartValidation) return;
+
+    const newProfile = {
+      ...profile,
+      ...member
+    };
+    const message = calculateValidation(newProfile);
+    dispatch(validationActions.setValidation(message));
   }
 
   return (
