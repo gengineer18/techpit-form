@@ -7,6 +7,7 @@ import {
   FormControlLabel,
   Radio,
   RadioGroup,
+  FormHelperText
 } from '@material-ui/core'
 
 // 型定義
@@ -26,6 +27,7 @@ import useStyles from './styles'
 export const Basic = () => {
   const dispatch = useDispatch()
   const profile = useSelector((state: RootState) => state.profile)
+  const validation = useSelector((state: RootState) => state.validation);
   const classes = useStyles()
 
   const handleChange = (member: Partial<Profile>) => {
@@ -39,6 +41,9 @@ export const Basic = () => {
         className={classes.formField}
         label={PROFILE.NAME}
         value={profile.name}
+        required
+        error={!!validation.message.name}
+        helperText={validation.message.name}
         onChange={e => handleChange({name: e.target.value})}
       />
       <TextField
@@ -48,9 +53,15 @@ export const Basic = () => {
         rows={5}
         label={PROFILE.DESCRIPTION}
         value={profile.description}
+        error={!!validation.message.description}
+        helperText={validation.message.description}
         onChange={e => handleChange({description: e.target.value})}
       />
-      <FormControl className={classes.formField}>
+      <FormControl
+        className={classes.formField}
+        error={!!validation.message.gender}
+        required
+      >
         <FormLabel>{PROFILE.GENDER}</FormLabel>
         <RadioGroup
           value={profile.gender}
@@ -67,18 +78,22 @@ export const Basic = () => {
             control={<Radio color="primary" />}
           />
         </RadioGroup>
-        <TextField
-          fullWidth
-          className={classes.formField}
-          label={PROFILE.BIRTHDAY}
-          type="date"
-          InputLabelProps={{
-            shrink: true
-          }}
-          value={profile.birthday}
-          onChange={e => handleChange({birthday: e.target.value})}
-        />
+        <FormHelperText>{validation.message.gender}</FormHelperText>
       </FormControl>
+      <TextField
+        fullWidth
+        required
+        error={!!validation.message.birthday}
+        helperText={validation.message.birthday}
+        className={classes.formField}
+        label={PROFILE.BIRTHDAY}
+        type="date"
+        value={profile.birthday}
+        onChange={e => handleChange({ birthday: e.target.value })}
+        InputLabelProps={{
+          shrink: true
+        }}
+      />
     </>
   )
 }
