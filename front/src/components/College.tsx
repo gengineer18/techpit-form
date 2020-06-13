@@ -8,7 +8,8 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  FormHelperText
 } from '@material-ui/core'
 
 // 型定義
@@ -18,9 +19,12 @@ import { College as ICollege } from "../domain/entity/college";
 // action
 import { collegesActions } from "../store/colleges/actions"
 import { profileActions } from "../store/profile/actions";
+import validationActions from "../store/validation/actions";
+
 import { searchColleges } from '../store/colleges/effects'
 
 import { PROFILE } from "../domain/services/profile";
+import { calculateValidation } from "../domain/services/validation";
 
 import useStyles from './styles'
 
@@ -28,6 +32,7 @@ export const College = () => {
   const dispatch = useDispatch()
   const colleges = useSelector((state: RootState) => state.colleges)
   const profile = useSelector((state: RootState) => state.profile)
+  const validation = useSelector((state: RootState) => state.validation)
   const classes = useStyles()
 
   const currentCollege = colleges.result.filter(
@@ -48,6 +53,7 @@ export const College = () => {
 
   const handleCollegeChange = (member: Partial<ICollege>) => {
     dispatch(profileActions.setCollege(member));
+    recalculateValidation(member);
   }
 
   const handleReset = () => {
@@ -55,6 +61,16 @@ export const College = () => {
     dispatch(collegesActions.setSearchWord(""));
     dispatch(collegesActions.searchCollege.done({ result: [], params: {} }));
   }
+
+  const recalculateValidation = (member: Partial<ICollege>) => {
+    if (!validation.isStartValidation) return;
+    const newProfile = {
+      ...profile,
+      college: { ...profile.college, ...member }
+    };
+    const message = calculateValidation(newProfile);
+    dispatch(validationActions.setValidation(message));
+  };
 
   return (
     <>
@@ -94,59 +110,66 @@ export const College = () => {
       )}
       {profile.college.name && (
         <>
-          <div>{profile.college.name}が選択されています。</div>
-          <TextField
-            className={classes.formField}
-            label={PROFILE.COLLEGE.NAME}
-            fullWidth
-            value={profile.college.name}
-            disabled
-          />
-          <FormControl fullWidth className={classes.formField}>
-            <InputLabel>{PROFILE.COLLEGE.FACULTY}</InputLabel>
+        <TextField
+          className={classes.formField}
+          label={PROFILE.COLLEGE.NAME}
+          fullWidth
+          value={profile.college.name}
+          disabled
+        />
+        <FormControl
+          error={!!validation.message.college.faculty}
+          fullWidth
+          className={classes.formField}
+        >
+          <InputLabel>{PROFILE.COLLEGE.FACULTY}</InputLabel>
+          <Select
+            value={profile.college.faculty}
+            onChange={e =>
+              handleCollegeChange({
+                faculty: e.target.value as string,
+                // 学科はリセットしないとwarnning
+                department: ""
+              })
+            }
+          >
+            {currentCollege?.faculty.map(f => (
+              <MenuItem key={f.name} value={f.name}>
+                {f.name}
+              </MenuItem>
+            ))}
+          </Select>
+          <FormHelperText>
+            {validation.message.college.faculty}
+          </FormHelperText>
+        </FormControl>
+        {currentFaculty?.department.length > 0 && (
+          <FormControl required fullWidth className={classes.formField}>
+            <InputLabel>{PROFILE.COLLEGE.DEPARTMENT}</InputLabel>
             <Select
-              value={profile.college.faculty}
+              value={profile.college.department}
               onChange={e =>
-                handleCollegeChange({
-                  faculty: e.target.value as string,
-                  department: ""
-                })
+                handleCollegeChange({ department: e.target.value as string })
               }
             >
-              {currentCollege.faculty.map(f => (
-                <MenuItem key={f.name} value={f.name}>
-                  {f.name}
+              {currentFaculty.department.map(d => (
+                <MenuItem key={d} value={d}>
+                  {d}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
-          {currentFaculty?.department.length > 0 && (
-            <FormControl fullWidth className={classes.formField}>
-              <InputLabel>{PROFILE.COLLEGE.DEPARTMENT}</InputLabel>
-              <Select
-                value={profile.college.department}
-                onChange={e =>
-                  handleCollegeChange({ department: e.target.value as string })
-                }
-              >
-                {currentFaculty.department.map(d => (
-                  <MenuItem key={d} value={d}>
-                    {d}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
-          <Button
-            fullWidth
-            className={classes.button}
-            onClick={handleReset}
-            variant="outlined"
-            color="secondary"
-          >
-            学歴の入力情報をリセット
-          </Button>
-        </>
+        )}
+        <Button
+          fullWidth
+          className={classes.button}
+          onClick={handleReset}
+          variant="outlined"
+          color="secondary"
+        >
+          学歴の入力情報をリセット
+        </Button>
+      </>
       )}
     </>
   )
