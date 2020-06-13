@@ -59,3 +59,17 @@ const facultyValidation = (college: College) =>
 const isEmpty = (str: string) => !str.trim();
 
 const isTooLong = (str: string, maxLen: number) => str.trim().length >= maxLen;
+
+export const isValid = (message: Validation) => {
+  const falttenValues = Object.values(message)
+    .map(extractValues)
+    .flat() as string[];
+
+  return falttenValues.every(fv => !fv);
+};
+
+// 再帰的にObjectを配列に
+const extractValues = (obj: any): any[] | string => {
+  if (typeof obj === "string") return obj;
+  return Object.values(obj).map(extractValues);
+};
